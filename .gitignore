@@ -1,0 +1,6 @@
+# Test-Ausgaben und Zwischendateien
+*.wav
+*.krn
+tools/gen.json
+__pycache__/
+node_modules/
