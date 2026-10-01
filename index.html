@@ -213,6 +213,19 @@ input[type=range]{accent-color:var(--accent);width:130px}
 .btn.rec-on{background:var(--bad);border-color:var(--bad)}
 body.editing .toolbar, body.editing #micBanner, body.editing .under, body.editing .tip, body.editing .song-tools{display:none}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;max-width:min(560px,calc(100% - 32px));font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.finger-bar{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:12px 14px;display:grid;gap:10px}
+.fb-head{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline}
+.fb-head h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:22px}
+.fb-head p{margin:0;color:var(--muted);font-size:13.5px;max-width:80ch}
+.fb-row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.fb-sel{font-size:15px}
+.fb-sel b{font-family:var(--f-mono)}
+.fb-fingers{display:inline-flex;gap:6px}
+.fb-fingers button{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--surface-2);font-family:var(--f-mono);font-weight:700;font-size:18px;cursor:pointer;color:var(--ink)}
+.fb-fingers button:hover{border-color:var(--accent)}
+.fb-fingers button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.fb-fingers button:disabled{opacity:.4;cursor:default}
+body.fingering .toolbar, body.fingering #micBanner, body.fingering .tip, body.fingering .song-tools, body.fingering .under{display:none}
 kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--surface-2)}
 
 /* Hilfe */
@@ -269,6 +282,7 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
       </div>
       <div class="song-tools" id="songTools" hidden>
         <button class="btn" id="songEdit">Bearbeiten</button>
+        <button class="btn" id="songFingers">Fingersatz ändern</button>
         <button class="btn" id="songShare">Teilen</button>
         <button class="btn" id="songDelete">Löschen</button>
         <div class="share-panel" id="sharePanel" hidden><label for="shareOut">Lied-Code (zum Weitergeben kopieren)</label><textarea id="shareOut" rows="2" readonly></textarea></div>
@@ -376,6 +390,28 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
           <button class="btn primary" id="edSave">Speichern</button>
         </div>
         <p class="ed-help"><b>Tasten eingeben:</b> Notenlänge wählen, dann die Taste spielen – auf dem Digitalpiano, mit der PC-Tastatur oder per Klick auf die Klaviatur. Gleichzeitig gedrückte Tasten werden ein Akkord. <b>Live aufnehmen:</b> einfach spielen, die Seite rundet auf das Raster. Kürzel: <kbd>1</kbd>–<kbd>5</kbd> Notenlänge, <kbd>.</kbd> punktiert, <kbd>Leertaste</kbd> Pause, <kbd>←</kbd> Rücktaste = rückgängig.</p>
+      </section>
+
+      <section class="finger-bar" id="fingerBar" hidden aria-label="Fingersatz ändern">
+        <div class="fb-head">
+          <h3>Fingersatz ändern</h3>
+          <p>Klicke auf eine Note (Balken) und wähle den Finger. Die übrigen Noten passt der Fingersatz-Planer automatisch an. Mit dem Mausrad oder den Pfeiltasten blätterst du durch das Lied.</p>
+        </div>
+        <div class="fb-row">
+          <span class="fb-sel" id="fbSel">Noch keine Note gewählt</span>
+        </div>
+        <div class="fb-row">
+          <div class="fb-fingers" id="fbFingers" aria-label="Finger">
+            <button data-f="1" title="Daumen (Taste 1)">1</button><button data-f="2" title="Zeigefinger (Taste 2)">2</button><button data-f="3" title="Mittelfinger (Taste 3)">3</button><button data-f="4" title="Ringfinger (Taste 4)">4</button><button data-f="5" title="kleiner Finger (Taste 5)">5</button>
+          </div>
+          <button class="btn" id="fbAuto" title="Finger wieder automatisch wählen lassen (Entf)">Auto</button>
+          <button class="btn" id="fbHand" title="Note der anderen Hand zuweisen">Andere Hand</button>
+          <span class="sep"></span>
+          <button class="btn" id="fbPrev" title="vorige Note (←)">‹ Vorige</button>
+          <button class="btn" id="fbNext" title="nächste Note (→)">Nächste ›</button>
+          <button class="btn" id="fbResetAll" title="alle eigenen Fingersätze dieses Lieds entfernen">Alle zurücksetzen</button>
+          <button class="btn primary" id="fbDone">Fertig</button>
+        </div>
       </section>
 
       <div class="mic-banner" id="micBanner">
@@ -491,7 +527,7 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
           <li><b>Live aufnehmen:</b> mit Einzählen und Metronom einfach spielen. Die Seite rundet auf das gewählte Raster.</li>
           <li><b>MIDI laden:</b> eine MIDI-Datei öffnen, prüfen und speichern.</li>
         </ul>
-        <p>Die Fingersätze berechnet der Planer automatisch. Lieder bleiben in diesem Browser gespeichert. Mit <b>Teilen</b> bekommst du einen Lied-Code, den andere unter „Lied-Code einfügen“ laden können.</p>
+        <p>Die Fingersätze berechnet der Planer automatisch. Passt dir ein Finger nicht, klicke auf <b>Fingersatz ändern</b>, dann auf die Note, und wähle den Finger (Tasten <kbd>1</kbd>–<kbd>5</kbd>). Die übrigen Noten passen sich daran an. Lieder bleiben in diesem Browser gespeichert. Mit <b>Teilen</b> bekommst du einen Lied-Code, den andere unter „Lied-Code einfügen“ laden können.</p>
       </div>
       <div class="card">
         <h3>Besser üben</h3>
@@ -949,6 +985,7 @@ function reset(keepPlaying){
   lastNowKey = ""; renderNow(); renderStats();
 }
 function loadPiece(id){
+  if(typeof FE !== "undefined" && FE.active){ FE.active = false; FE.sel = null; document.body.classList.remove("fingering"); $("fingerBar").hidden = true; }
   const P = findPiece(id) || PIECES[0];
   S.P = P; S.from = 1; S.to = P.nBars;
   if(!P.notes.some(n=>n.h==="L") && S.practice==="L") setPractice("B", true);
@@ -1128,7 +1165,13 @@ function keyAt(x, y){
 }
 function ptPos(e){ const r = cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
 cv.addEventListener("pointerdown", e=>{
-  const [x,y] = ptPos(e); const m = keyAt(x,y); if(m===null) return;
+  const [x,y] = ptPos(e);
+  if(FE.active && y < K.fallH){
+    /* oberste getroffene Note (zuletzt gezeichnet), schwarze Tasten liegen oben */
+    let hit = null;
+    for(const r of FE.hit){ if(x >= r.x-2 && x <= r.x+r.w+2 && y >= r.y-2 && y <= r.y+r.h+2){ if(!hit || keyX(r.n.m).black) hit = r.n; } }
+    feSelect(hit, false); e.preventDefault(); return;
+  } const m = keyAt(x,y); if(m===null) return;
   e.preventDefault(); try{ cv.setPointerCapture(e.pointerId); }catch(_){}
   pointers.set(e.pointerId, m); userOn(m, "ptr");
 });
@@ -1145,6 +1188,15 @@ const pcDown = new Map();
 function isFormEl(t){ return t && (t.tagName==="INPUT" && t.type!=="checkbox" || t.tagName==="SELECT" || t.tagName==="TEXTAREA"); }
 window.addEventListener("keydown", e=>{
   if(isFormEl(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
+  if(FE.active){
+    const d = {Digit1:1, Digit2:2, Digit3:3, Digit4:4, Digit5:5, Numpad1:1, Numpad2:2, Numpad3:3, Numpad4:4, Numpad5:5}[e.code];
+    if(d && FE.sel){ e.preventDefault(); feSetFinger(d); return; }
+    if((e.code==="Delete" || e.code==="Backspace" || e.code==="Digit0") && FE.sel){ e.preventDefault(); feSetFinger(0); return; }
+    if(e.code==="ArrowRight"){ e.preventDefault(); feStep(1); return; }
+    if(e.code==="ArrowLeft"){ e.preventDefault(); feStep(-1); return; }
+    if(e.code==="Escape" || e.code==="Enter"){ e.preventDefault(); feStop(); return; }
+    if(e.code==="Space") { e.preventDefault(); return; }
+  }
   if(ED.active){
     if(e.code==="Space"){ e.preventDefault(); if(ED.mode==="rec"){ ED.rec ? edRecStop() : edRecStart(); } else edRest(); return; }
     if(e.code==="Backspace"){ e.preventDefault(); edUndo(); return; }
@@ -1868,6 +1920,7 @@ function draw(now){
   c.save(); c.beginPath(); c.rect(0,0,W,fh); c.clip();
   const waitSet = S.waiting ? new Set(S.waiting.notes) : null;
   const noteList = S.liveNotes ? S.wnotes.concat(S.liveNotes) : S.wnotes;
+  if(FE.active) FE.hit = [];
   for(const n of noteList){
     const y1 = fh - (n.t - S.t)*ppb;
     const y0 = y1 - n.d*ppb;
@@ -1881,10 +1934,17 @@ function draw(now){
     c.globalAlpha = on ? 1 : 0.33;
     rr(x, y1-h, w, h, Math.min(6, w/3)); c.fillStyle = col; c.fill();
     c.fillStyle = "rgba(255,255,255,0.18)"; c.fillRect(x+2, y1-h+1, Math.max(1,w-4), Math.min(2,h));
-    if(n.f && (on || S.mode==="demo")){
+    if(n.f && (on || S.mode==="demo" || FE.active)){
       const rad = Math.max(6, Math.min(w/2 - 1, 10));
       const cy = Math.max(y1-h+rad+1, Math.min(y1 - rad - 3, fh - rad - 3));
-      fingerDot(x+w/2, h > rad*2+2 ? cy : y1 - h/2, rad, COL_DK[n.h], n.f);
+      const fy = h > rad*2+2 ? cy : y1 - h/2;
+      fingerDot(x+w/2, fy, rad, COL_DK[n.h], n.f);
+      if(n.fx){ c.beginPath(); c.arc(x+w/2, fy, rad+2, 0, Math.PI*2); c.strokeStyle = "#ffffff"; c.lineWidth = 1.5; c.stroke(); }
+    }
+    if(FE.active){ FE.hit.push({n, x, y:y1-h, w, h}); }
+    if(FE.active && FE.sel === n){
+      c.globalAlpha = 1; c.lineWidth = 3; c.strokeStyle = "#ffe066";
+      rr(x-2, y1-h-2, w+4, h+4, Math.min(7, w/3+2)); c.stroke();
     }
     c.globalAlpha = 1;
   }
@@ -1915,6 +1975,7 @@ function draw(now){
     }
   }
   if(S.waiting) S.waiting.notes.forEach(n=>{ if(practiced(n.h)) set(n.m,{type:S.hit.has(n.m)?"hit":"need",n,pri:3}); });
+  if(FE.active){ ks.clear(); if(FE.sel) set(FE.sel.m, {type:"sound", n:FE.sel, pri:6}); }
   if(CAL.active){ ks.clear(); if(CAL.m!=null) set(CAL.m,{type:"need", n:{m:CAL.m, h:"R", f:"♪", de:midiName(CAL.m), int:midiName(CAL.m)}, pri:5}); }
   const pulse = 0.55 + 0.45*Math.sin(now/170);
   const fsz = Math.max(8, Math.min(13, K.ww*0.36));
@@ -1976,14 +2037,14 @@ function draw(now){
   const span = S.endT - S.startT;
   $("progress").style.width = (Math.max(0, Math.min(1, (S.t - S.startT)/span))*100) + "%";
   const b = barOf(Math.max(0,S.t));
-  $("barNow").textContent = ED.active ? "Lied-Editor" : S.t < S.startT ? "Einzählen …" : (b===0 ? "Auftakt" : `Takt ${Math.min(b, S.P.nBars)} / ${S.P.nBars}`);
+  $("barNow").textContent = FE.active ? "Fingersatz ändern" : ED.active ? "Lied-Editor" : S.t < S.startT ? "Einzählen …" : (b===0 ? "Auftakt" : `Takt ${Math.min(b, S.P.nBars)} / ${S.P.nBars}`);
 }
 
 /* ---------- Schleife ---------- */
 let last = performance.now();
 function frame(ts){
   const dt = Math.min(0.1, (ts-last)/1000); last = ts;
-  if(S.playing && S.P && !ED.active) advance(dt);
+  if(S.playing && S.P && !ED.active && !FE.active) advance(dt);
   edTick();
   if(!ED.active) micTick();
   draw(ts);
@@ -2037,6 +2098,7 @@ function fingerHand(evs, left, beam){
   for(const g of groups){
     const t = g.t;
     const nw = g.m.slice().sort((a,b)=>sgn*evs[a].m - sgn*evs[b].m);
+    const fixed = nw.filter(i=>evs[i].fix);
     const newp = nw.map(i=>sgn*evs[i].m);
     const nxt = new Map();
     for(const [key, st] of states){
@@ -2046,6 +2108,8 @@ function fingerHand(evs, left, beam){
       const free = new Set([1,2,3,4,5]); held.forEach(h=>free.delete(h[1]));
       let opts = nw.length <= 5 ? fAssign(newp, held, free) : [];
       if(!opts.length && held.length){ held = []; opts = fAssign(newp, [], new Set([1,2,3,4,5])); cost += 3; }
+      /* vom Nutzer festgelegte Finger sind Pflicht (falls überhaupt erfüllbar) */
+      if(fixed.length){ const ok = opts.filter(o=>o.every(([p,f],k)=>!evs[nw[k]].fix || evs[nw[k]].fix===f)); if(ok.length) opts = ok; }
       if(!opts.length) continue;
       const prevEnd = st.snd.reduce((a,x)=>Math.max(a, x[2]), t);
       const w = 1 / (1 + 2*Math.max(0, t - prevEnd));
@@ -2092,7 +2156,7 @@ const SHARP_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"], FLAT
 const spellMidi = (m, flats) => (flats ? FLAT_NAMES : SHARP_NAMES)[m%12] + (Math.floor(m/12)-1);
 /* Lied (gespeichertes Format) → Stück für die App */
 function songToPiece(sg){
-  const evs = (sg.notes||[]).map(n=>({t:n[0], d:n[1], m:n[2], h:n[3]}));
+  const evs = (sg.notes||[]).map((n,i)=>({t:n[0], d:n[1], m:n[2], h:n[3], fix:+n[4]||0, si:i}));
   for(const h of ["L","R"]){
     const hs = evs.filter(e=>e.h===h);
     const fs = fingerHand(hs, h==="L");
@@ -2101,12 +2165,16 @@ function songToPiece(sg){
   const p = {
     id: sg.id, user:true, level:0, title: sg.title || "Ohne Titel", composer: "Eigenes Lied", key: sg.flats ? "♭-Tonart" : "–",
     meter: sg.meter || [4,4], bpm: sg.bpm || 90, auto:true, pedal: !!sg.pedal,
-    tip: "Dein eigenes Lied. Die Fingersätze hat der Fingersatz-Planer berechnet. Mit „Bearbeiten“ kannst du Töne ergänzen oder ändern.",
+    tip: "Dein eigenes Lied. Die Fingersätze hat der Fingersatz-Planer berechnet. Mit „Bearbeiten“ ergänzt oder änderst du Töne, mit „Fingersatz ändern“ legst du für einzelne Noten deinen eigenen Finger fest.",
     events: evs.map(e=>[e.t, e.d, spellMidi(e.m, sg.flats), e.h, e.f].join(",")).join(";"),
     minTotal: (sg.meter ? sg.meter[0]*4/sg.meter[1] : 4)
   };
   if(!evs.length) p.events = "";
-  return build(p);
+  build(p);
+  /* jede Note kennt ihre Stelle im Lied (zum Bearbeiten) und ob ihr Finger festgelegt ist */
+  const byKey = new Map(evs.map(e=>[(+e.t).toFixed(4)+"|"+e.m, e]));
+  p.notes.forEach(n=>{ const e = byKey.get((+n.t).toFixed(4)+"|"+n.m); if(e){ n.si = e.si; n.fx = !!e.fix; } });
+  return p;
 }
 let USER_PIECES = USER_SONGS.map(songToPiece);
 function findPiece(id){ return PIECES.find(p=>p.id===id) || USER_PIECES.find(p=>p.id===id); }
@@ -2261,7 +2329,7 @@ function toast(msg){
 
 /* ---------- Teilen: Lied als Code ---------- */
 function songCode(sg){
-  const o = {v:1, ti: sg.title, me: sg.meter, bp: sg.bpm, fl: sg.flats?1:0, n: sg.notes.map(n=>[n[0], n[1], n[2], n[3]==="L"?0:1])};
+  const o = {v:1, ti: sg.title, me: sg.meter, bp: sg.bpm, fl: sg.flats?1:0, n: sg.notes.map(n=>n[4] ? [n[0], n[1], n[2], n[3]==="L"?0:1, n[4]] : [n[0], n[1], n[2], n[3]==="L"?0:1])};
   return "TW1:" + btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 }
 function codeToSong(code){
@@ -2269,7 +2337,7 @@ function codeToSong(code){
   const o = JSON.parse(decodeURIComponent(escape(atob(s))));
   if(!o || !Array.isArray(o.n)) throw new Error("kein Lied-Code");
   return {id:"u"+Date.now().toString(36), title: String(o.ti||"Geteiltes Lied").slice(0,80), meter: o.me||[4,4], bpm: +o.bp||90, flats: !!o.fl,
-    notes: o.n.filter(n=>Array.isArray(n) && n.length>=4).map(n=>[+n[0], +n[1], Math.max(21, Math.min(108, +n[2]|0)), n[3]?"R":"L"])};
+    notes: o.n.filter(n=>Array.isArray(n) && n.length>=4).map(n=>{ const a = [+n[0], +n[1], Math.max(21, Math.min(108, +n[2]|0)), n[3]?"R":"L"]; const f = +n[4]|0; if(f>=1 && f<=5) a.push(f); return a; })};
 }
 
 /* ---------- MIDI-Datei lesen (Standard MIDI File, Format 0/1) ---------- */
@@ -2381,6 +2449,89 @@ $("songDelete").onclick = e=>{
   delete b.dataset.armed; b.textContent = "Löschen";
   loadPiece(PIECES[0].id); toast("Lied gelöscht.");
 };
+/* ---------- Fingersatz eigener Lieder ändern ---------- */
+const FE = {active:false, sel:null, hit:[]};
+const feSong = () => USER_SONGS.find(x=>x.id===(S.P && S.P.id));
+function feStart(){
+  if(!S.P || !S.P.user) return;
+  setPlaying(false); FE.active = true; FE.sel = null;
+  document.body.classList.add("fingering"); $("fingerBar").hidden = false;
+  /* Ansicht so stellen, dass die ersten Noten sichtbar sind */
+  S.t = Math.max(S.startT - LEAD(), (S.P.notes[0] ? S.P.notes[0].t : 0) - 0.5);
+  feInfo();
+  $("fingerBar").scrollIntoView({behavior:"smooth", block:"start"});
+}
+function feStop(){
+  FE.active = false; FE.sel = null; document.body.classList.remove("fingering"); $("fingerBar").hidden = true;
+  reset();
+}
+function feVisibleBeats(){ return (K.fallH/K.pps) / spb(); }
+function feSelect(n, scroll){
+  FE.sel = n || null;
+  if(n){
+    if(scroll){ const vis = feVisibleBeats(); if(n.t < S.t || n.t + Math.min(n.d, vis*0.5) > S.t + vis*0.95) S.t = n.t - vis*0.25; }
+    const v = voice(n.m, 0.7); if(v) v.release(AC.currentTime + 0.35);
+  }
+  feInfo();
+}
+function feInfo(){
+  const n = FE.sel;
+  document.querySelectorAll("#fbFingers button").forEach(b=>{ b.disabled = !n; b.setAttribute("aria-pressed", !!n && +b.dataset.f === n.f && n.fx); });
+  ["fbAuto","fbHand"].forEach(id=>{ $(id).disabled = !n; });
+  if(!n){ $("fbSel").textContent = "Noch keine Note gewählt – klicke auf einen Balken."; return; }
+  const bar = barOf(n.t);
+  $("fbSel").innerHTML = `Gewählt: <b>${nm(n)}</b> · ${n.h==="R"?"rechte":"linke"} Hand · Takt ${bar} · Finger <b>${n.f||"–"}</b> ${n.fx ? "(von dir festgelegt)" : "(automatisch)"}`;
+}
+/* Änderung speichern, Lied neu berechnen, Ansicht behalten */
+function feApply(change){
+  const sg = feSong(); const n = FE.sel; if(!sg || !n || n.si === undefined) return;
+  const before = new Map(S.P.notes.map(x=>[x.si, x.f]));
+  const note = sg.notes[n.si]; if(!note) return;
+  change(note);
+  saveSongs();
+  const keepT = S.t, si = n.si;
+  const P = songToPiece(sg);
+  USER_PIECES = USER_PIECES.map(x=>x.id===P.id ? P : x);
+  S.P = P; buildWindow(); S.gp = S.win.length; S.waiting = null; S.t = keepT;
+  const changed = P.notes.filter(x=>x.si!==si && before.has(x.si) && before.get(x.si)!==x.f).length;
+  FE.sel = P.notes.find(x=>x.si===si) || null;
+  feInfo();
+  if(changed) toast(`Gespeichert. ${changed} ${changed===1?"andere Note wurde":"andere Noten wurden"} an deinen Finger angepasst.`);
+}
+function feSetFinger(f){ feApply(note=>{ note.length = 4; if(f) note.push(f); }); }
+function feToggleHand(){ feApply(note=>{ note[3] = note[3]==="L" ? "R" : "L"; note.length = 4; }); }
+function feStep(dir){
+  const list = S.wnotes.slice().sort((a,b)=>a.t-b.t || a.m-b.m);
+  if(!list.length) return;
+  let i = FE.sel ? list.indexOf(FE.sel) : -1;
+  if(i < 0){ i = dir > 0 ? list.findIndex(x=>x.t >= S.t) : list.length-1; if(i < 0) i = 0; }
+  else i = Math.max(0, Math.min(list.length-1, i + dir));
+  feSelect(list[i], true);
+}
+$("songFingers").onclick = feStart;
+$("fbDone").onclick = feStop;
+$("fbFingers").onclick = e=>{ const b = e.target.closest("button"); if(b && !b.disabled) feSetFinger(+b.dataset.f); };
+$("fbAuto").onclick = ()=>feSetFinger(0);
+$("fbHand").onclick = feToggleHand;
+$("fbPrev").onclick = ()=>feStep(-1);
+$("fbNext").onclick = ()=>feStep(1);
+$("fbResetAll").onclick = e=>{
+  const b = e.currentTarget;
+  if(!b.dataset.armed){ b.dataset.armed = 1; b.textContent = "Wirklich alle?"; setTimeout(()=>{ delete b.dataset.armed; b.textContent = "Alle zurücksetzen"; }, 3000); return; }
+  delete b.dataset.armed; b.textContent = "Alle zurücksetzen";
+  const sg = feSong(); if(!sg) return;
+  sg.notes.forEach(n=>{ n.length = 4; }); saveSongs();
+  const keepT = S.t; const P = songToPiece(sg); USER_PIECES = USER_PIECES.map(x=>x.id===P.id ? P : x);
+  S.P = P; buildWindow(); S.gp = S.win.length; S.t = keepT; FE.sel = null; feInfo(); toast("Alle Fingersätze wieder automatisch.");
+};
+/* Mausrad blättert durch das Lied */
+stage.addEventListener("wheel", e=>{
+  if(!FE.active) return;
+  e.preventDefault();
+  const vis = feVisibleBeats();
+  S.t = Math.max(S.startT - LEAD(), Math.min(S.P.total, S.t - Math.sign(e.deltaY) * vis * 0.15));
+}, {passive:false});
+
 function songToolsUi(){ const u = !!(S.P && S.P.user); $("songTools").hidden = !u; $("sharePanel").hidden = true; }
 
 /* Bibliothek: „Meine Lieder“ */

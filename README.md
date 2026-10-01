@@ -78,6 +78,7 @@ Unter **Meine Lieder → + Neues Lied** öffnet sich der Lied-Editor:
 - **Hände:** automatisch über einen Trennpunkt (z. B. alles ab C4 = rechte Hand) oder fest links/rechts.
 - **MIDI laden:** Standard-MIDI-Dateien (Format 0 und 1). Taktart, Tempo und Vorzeichen werden übernommen; bei zwei Spuren wird die höhere der rechten Hand zugeordnet.
 - **Speichern:** Das Lied erscheint unter *Meine Lieder* und lässt sich wie jedes andere Stück üben – mit automatisch berechneten Fingersätzen.
+- **Fingersatz ändern:** Note anklicken und Finger 1–5 wählen (oder Tasten <kbd>1</kbd>–<kbd>5</kbd>). Deine Vorgaben gelten als feste Bedingung, der Fingersatz-Planer passt die übrigen Noten daran an. *Auto* gibt eine Note an den Planer zurück, *Andere Hand* weist sie der anderen Hand zu.
 - **Teilen:** erzeugt einen Lied-Code (`TW1:…`), den andere unter *Lied-Code einfügen* importieren können.
 
 Eigene Lieder werden im `localStorage` des Browsers gespeichert.
