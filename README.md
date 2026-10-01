@@ -180,7 +180,3 @@ TW_URL=http://localhost:8765/index.html node runbg.js bg.wav ode-rechts 20
     > License: https://creativecommons.org/licenses/by/4.0
 - **Fingersatz-Modell:** Parncutt, R., Sloboda, J. A., Clarke, E. F., Raekallio, M., & Desain, P. (1997). *An ergonomic model of keyboard fingering for melodic fragments.* Music Perception, 14(4), 341–382.
 - Die Fingersätze der Stufen 1–4 (außer Bach und Chopin) sind gängige Vorschläge für Lernende; alle übrigen sind automatisch berechnet.
-
----
-
-Gebaut von Timo Müller-Gesser mit Claude.
